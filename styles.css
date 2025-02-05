@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Galindo&display=swap');
+
+
+h1 {
+    font-size: 50px;
+}
+
+body {
+    font-family: "Galindo";
+    text-align: center;
+    background-color: #B88FC9;
+}   
+
+.desc {
+    font-size: 20px;
+}
+
+a {
+    text-align: bottom;
+    color:#000000;
+
+}
+
+a:hover{
+    color: orange;
+    size: 110%;
+}
+
+.garfield{
+    width: 256px;
+    height: 256px;
+    border-radius: 20px;
+}
+
+.icons {
+    width: 64px;
+    height: 64px;
+    position: absolute;
+    bottom: 10px;
+    right: 48%;
+}

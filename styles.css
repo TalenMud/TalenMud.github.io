@@ -5,16 +5,24 @@ h1 {
     font-size: 50px;
 }
 
+.subheader{
+    color: #333333;
+}
+
 body {
     font-family: "Galindo";
     text-align: center;
-    background-color: #B88FC9;
+    background-color: #9153ac;
+    padding-top: 60px;
 }   
 
 .desc {
     font-size: 20px;
 }
 
+.icons hover{
+    color: #9153ac;
+}
 a {
     text-align: bottom;
     color:#000000;
@@ -26,16 +34,20 @@ a:hover{
     size: 110%;
 }
 
-.garfield{
+.imageIcon{
     width: 256px;
     height: 256px;
     border-radius: 20px;
 }
 
 .icons {
-    width: 64px;
-    height: 64px;
+    width: 256px;
+    height: 256px;
     position: absolute;
-    bottom: 10px;
-    right: 48.5%;
+    right:42.5%;
 }
+
+.navbar a {
+    padding: 10px;
+  }
+

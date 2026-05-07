@@ -1,0 +1,297 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: 'Courier New', monospace;
+}
+
+#webgl {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: block;
+}
+
+#overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+#overlay > * { pointer-events: auto; }
+
+/* ── Landing UI ── */
+#landing-ui {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  transform: translateY(-8%);
+}
+
+#landing-ui h1 {
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 40px rgba(0,229,255,0.4);
+  user-select: none;
+}
+
+#landing-ui h1 .yo {
+  color: #00e5ff;
+  text-shadow: 0 0 20px #00e5ff, 0 0 60px rgba(0,229,255,0.5);
+}
+
+#landing-ui h1 .talen {
+  color: #ffffff;
+  text-shadow: 0 0 20px rgba(255,255,255,0.6);
+}
+
+#landing-ui h1 .neutral { color: rgba(255,255,255,0.85); }
+
+#enter-btn {
+  background: transparent;
+  border: 1px solid rgba(139,47,201,0.8);
+  color: #d4a8ff;
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+  padding: 12px 32px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(139,47,201,0.3), inset 0 0 20px rgba(139,47,201,0.05);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+#enter-btn:hover {
+  background: rgba(139,47,201,0.2);
+  box-shadow: 0 0 40px rgba(139,47,201,0.6), inset 0 0 30px rgba(139,47,201,0.15);
+  color: #fff;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(139,47,201,0.3), inset 0 0 20px rgba(139,47,201,0.05); }
+  50% { box-shadow: 0 0 40px rgba(139,47,201,0.6), inset 0 0 30px rgba(139,47,201,0.15); }
+}
+
+/* ── Hyperspace flash overlay ── */
+#hyperspace-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Projects UI ── */
+#projects-ui {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+#record-tooltip {
+  position: absolute;
+  color: #fff;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  transform: translate(-50%, -130%);
+  white-space: nowrap;
+}
+
+#project-card {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.85);
+  width: min(420px, 88vw);
+  background: rgba(10,10,20,0.92);
+  border: 1px solid rgba(139,47,201,0.5);
+  padding: 36px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s, transform 0.35s;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 60px rgba(139,47,201,0.25);
+}
+
+#project-card.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
+}
+
+#project-card h2 {
+  color: #fff;
+  font-size: 1.4rem;
+  margin-bottom: 12px;
+  letter-spacing: 0.05em;
+}
+
+#project-card p {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+#close-card {
+  position: absolute;
+  top: 14px; right: 18px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+#close-card:hover { color: #fff; }
+
+/* ── Find Me UI ── */
+#findme-ui {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+}
+
+#findme-ui h2 {
+  color: #fff;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 30px rgba(0,229,255,0.4);
+}
+
+.social-grid {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.social-card {
+  width: 120px;
+  height: 120px;
+  border: 1px solid rgba(255,255,255,0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: rgba(255,255,255,0.5);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  background: rgba(255,255,255,0.02);
+}
+
+.social-card:hover {
+  border-color: rgba(0,229,255,0.5);
+  color: #00e5ff;
+  background: rgba(0,229,255,0.05);
+  box-shadow: 0 0 20px rgba(0,229,255,0.15);
+}
+
+.social-card .social-icon {
+  font-size: 2rem;
+  opacity: 0.7;
+}
+
+/* ── Quick Nav ── */
+#quick-nav {
+  position: fixed;
+  bottom: 32px;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  z-index: 100;
+}
+
+#quick-nav-toggle {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  padding: 6px 0;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+#quick-nav-toggle:hover { color: #fff; }
+
+#quick-nav-options {
+  display: flex;
+  gap: 8px;
+  overflow: hidden;
+  max-width: 0;
+  transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#quick-nav-options.open { max-width: 400px; }
+
+.nav-opt {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.6);
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  padding: 5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  opacity: 0;
+  transform: translateX(-8px);
+}
+
+#quick-nav-options.open .nav-opt {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+#quick-nav-options.open .nav-opt:nth-child(1) { transition: all 0.2s 0.05s; }
+#quick-nav-options.open .nav-opt:nth-child(2) { transition: all 0.2s 0.1s; }
+#quick-nav-options.open .nav-opt:nth-child(3) { transition: all 0.2s 0.15s; }
+#quick-nav-options.open .nav-opt:nth-child(4) { transition: all 0.2s 0.2s; }
+
+.nav-opt:hover {
+  border-color: rgba(0,229,255,0.5);
+  color: #00e5ff;
+}
+
+/* ── Fade overlay for scene transitions ── */
+#scene-fade {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 50;
+  transition: opacity 0.6s ease;
+}
+
+#scene-fade.fade-in { opacity: 1; }

@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apps Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Galindo&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: "Galindo", sans-serif;
+            background-color: #9153ac;
+            min-height: 100vh;
+            color: #000;
+        }
+
+        /* ── LOGIN ── */
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #login-screen h1 {
+            font-size: 40px;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+
+        .login-box {
+            background: #74428a;
+            border-radius: 16px;
+            padding: 40px 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .login-box label {
+            color: #e0c8f0;
+            font-size: 14px;
+            margin-bottom: -8px;
+        }
+
+        .login-box input {
+            font-family: "Galindo", sans-serif;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 2px solid #9153ac;
+            background: #f5eeff;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .login-box input:focus {
+            border-color: #fff;
+        }
+
+        .btn-primary {
+            font-family: "Galindo", sans-serif;
+            background: #9153ac;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover { background: #a865c0; }
+
+        #login-error {
+            color: #ffb3b3;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+
+        /* ── DASHBOARD ── */
+        #dashboard { display: none; }
+
+        .dash-header {
+            background: #74428a;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+
+        .dash-header h1 {
+            color: #fff;
+            font-size: 22px;
+        }
+
+        .btn-logout {
+            font-family: "Galindo", sans-serif;
+            background: transparent;
+            color: #e0c8f0;
+            border: 2px solid #e0c8f0;
+            border-radius: 8px;
+            padding: 6px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover { background: #e0c8f0; color: #74428a; }
+
+        .dash-body {
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ── STATS ── */
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #74428a;
+            border-radius: 12px;
+            padding: 16px 24px;
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .stat-card .num {
+            font-size: 36px;
+            line-height: 1;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: #d4aaef;
+            margin-top: 4px;
+        }
+
+        /* ── ADD FORM ── */
+        .section-card {
+            background: #74428a;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .section-title {
+            color: #fff;
+            font-size: 18px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .section-title .toggle-icon {
+            font-size: 20px;
+            transition: transform 0.2s;
+        }
+
+        .collapsible-body { overflow: hidden; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.full-width { grid-column: 1 / -1; }
+
+        .form-group label {
+            color: #d4aaef;
+            font-size: 12px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            font-family: "Galindo", sans-serif;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 2px solid #9153ac;
+            background: #f5eeff;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus { border-color: #fff; }
+
+        .form-group textarea { resize: vertical; min-height: 70px; }
+
+        .btn-add {
+            font-family: "Galindo", sans-serif;
+            background: #9153ac;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 28px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-add:hover { background: #a865c0; }
+
+        /* ── FILTERS ── */
+        .filters-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-group label { color: #e0c8f0; font-size: 12px; }
+
+        .filter-group select,
+        .filter-group input {
+            font-family: "Galindo", sans-serif;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 2px solid #9153ac;
+            background: #f5eeff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .btn-clear {
+            font-family: "Galindo", sans-serif;
+            background: transparent;
+            color: #e0c8f0;
+            border: 2px solid #9153ac;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            align-self: flex-end;
+            transition: all 0.2s;
+        }
+
+        .btn-clear:hover { border-color: #fff; color: #fff; }
+
+        /* ── TABLE ── */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #f5eeff;
+            font-size: 14px;
+        }
+
+        thead { background: #5a3170; color: #fff; }
+
+        th {
+            padding: 12px 14px;
+            text-align: left;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 11px 14px;
+            border-bottom: 1px solid #d9c0f0;
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #eedeff; }
+
+        /* Status badges */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .badge-applied    { background: #cce5ff; color: #004085; }
+        .badge-interview  { background: #fff3cd; color: #856404; }
+        .badge-offer      { background: #d4edda; color: #155724; }
+        .badge-rejected   { background: #f8d7da; color: #721c24; }
+        .badge-withdrawn  { background: #e2e3e5; color: #383d41; }
+        .badge-pending    { background: #e0c8f0; color: #5a3170; }
+
+        /* Type badges */
+        .type-internship  { background: #d1ecf1; color: #0c5460; }
+        .type-placement   { background: #fce8ff; color: #6a1b9a; }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+
+        .btn-icon:hover { background: #d9c0f0; }
+
+        .actions-cell { white-space: nowrap; }
+
+        /* Edit inline */
+        .editing td { background: #fff8ff; }
+
+        select.inline-edit,
+        input.inline-edit {
+            font-family: "Galindo", sans-serif;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 2px solid #9153ac;
+            background: #fff;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #9b7ab0;
+            padding: 40px;
+            font-size: 16px;
+            background: #f5eeff;
+        }
+
+        .results-count {
+            color: #e0c8f0;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── LOGIN SCREEN ── -->
+<div id="login-screen">
+    <h1>Apps Tracker</h1>
+    <div class="login-box">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="username" autocomplete="username">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="password" autocomplete="current-password">
+        <div id="login-error">Incorrect username or password.</div>
+        <button class="btn-primary" onclick="doLogin()">Log In</button>
+    </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div id="dashboard">
+    <div class="dash-header">
+        <h1>&#127891; Apps Tracker</h1>
+        <button class="btn-logout" onclick="doLogout()">Log Out</button>
+    </div>
+
+    <div class="dash-body">
+
+        <!-- Stats -->
+        <div class="stats-row" id="stats-row">
+            <div class="stat-card"><div class="num" id="stat-total">0</div><div class="label">Total</div></div>
+            <div class="stat-card"><div class="num" id="stat-applied">0</div><div class="label">Applied</div></div>
+            <div class="stat-card"><div class="num" id="stat-interview">0</div><div class="label">Interviewing</div></div>
+            <div class="stat-card"><div class="num" id="stat-offer">0</div><div class="label">Offers</div></div>
+            <div class="stat-card"><div class="num" id="stat-rejected">0</div><div class="label">Rejected</div></div>
+        </div>
+
+        <!-- Add Application -->
+        <div class="section-card">
+            <div class="section-title" onclick="toggleForm()">
+                <span>+ Add Application</span>
+                <span class="toggle-icon" id="form-toggle-icon">&#9660;</span>
+            </div>
+            <div class="collapsible-body" id="add-form-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Your Name</label>
+                        <input type="text" id="f-person" placeholder="e.g. Talen">
+                    </div>
+                    <div class="form-group">
+                        <label>Company</label>
+                        <input type="text" id="f-company" placeholder="e.g. Google">
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <input type="text" id="f-role" placeholder="e.g. Software Engineer">
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select id="f-type">
+                            <option value="Internship">Internship</option>
+                            <option value="Placement Year">Placement Year</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="f-status">
+                            <option value="Applied">Applied</option>
+                            <option value="Interview">Interviewing</option>
+                            <option value="Offer">Offer</option>
+                            <option value="Rejected">Rejected</option>
+                            <option value="Withdrawn">Withdrawn</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date Applied</label>
+                        <input type="date" id="f-date">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Notes</label>
+                        <textarea id="f-notes" placeholder="Interview rounds, recruiter contact, deadlines..."></textarea>
+                    </div>
+                </div>
+                <button class="btn-add" onclick="addApplication()">Add</button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-row">
+            <div class="filter-group">
+                <label>Person</label>
+                <select id="filter-person" onchange="renderTable()">
+                    <option value="">Everyone</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Type</label>
+                <select id="filter-type" onchange="renderTable()">
+                    <option value="">All Types</option>
+                    <option value="Internship">Internship</option>
+                    <option value="Placement Year">Placement Year</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Status</label>
+                <select id="filter-status" onchange="renderTable()">
+                    <option value="">All Statuses</option>
+                    <option value="Applied">Applied</option>
+                    <option value="Interview">Interviewing</option>
+                    <option value="Offer">Offer</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Withdrawn">Withdrawn</option>
+                    <option value="Pending">Pending</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Search</label>
+                <input type="text" id="filter-search" placeholder="Company or role..." oninput="renderTable()" style="width:180px;">
+            </div>
+            <button class="btn-clear" onclick="clearFilters()">Clear</button>
+        </div>
+
+        <div class="results-count" id="results-count"></div>
+
+        <!-- Table -->
+        <div class="table-wrapper">
+            <table id="apps-table">
+                <thead>
+                    <tr>
+                        <th>Person</th>
+                        <th>Company</th>
+                        <th>Role</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Date Applied</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr><td colspan="8" class="empty-state">No applications yet. Add one above!</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const CREDENTIALS = { username: 'talen', password: 'talen' };
+    const STORE_KEY = 'appsTrackerData';
+
+    // ── Auth ──
+    function doLogin() {
+        const u = document.getElementById('username').value.trim();
+        const p = document.getElementById('password').value;
+        if (u === CREDENTIALS.username && p === CREDENTIALS.password) {
+            sessionStorage.setItem('appsLoggedIn', '1');
+            document.getElementById('login-error').style.display = 'none';
+            showDashboard();
+        } else {
+            document.getElementById('login-error').style.display = 'block';
+        }
+    }
+
+    function doLogout() {
+        sessionStorage.removeItem('appsLoggedIn');
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+    }
+
+    document.getElementById('password').addEventListener('keydown', e => {
+        if (e.key === 'Enter') doLogin();
+    });
+
+    function showDashboard() {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        renderTable();
+        updateStats();
+        populatePersonFilter();
+    }
+
+    // Auto-login if session active
+    if (sessionStorage.getItem('appsLoggedIn') === '1') showDashboard();
+
+    // ── Data ──
+    function loadData() {
+        try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+        catch { return []; }
+    }
+
+    function saveData(data) {
+        localStorage.setItem(STORE_KEY, JSON.stringify(data));
+    }
+
+    // ── Add ──
+    function addApplication() {
+        const person  = document.getElementById('f-person').value.trim();
+        const company = document.getElementById('f-company').value.trim();
+        const role    = document.getElementById('f-role').value.trim();
+        const type    = document.getElementById('f-type').value;
+        const status  = document.getElementById('f-status').value;
+        const date    = document.getElementById('f-date').value;
+        const notes   = document.getElementById('f-notes').value.trim();
+
+        if (!person || !company || !role) {
+            alert('Please fill in Name, Company, and Role.');
+            return;
+        }
+
+        const data = loadData();
+        data.unshift({
+            id: Date.now(),
+            person, company, role, type, status, date, notes
+        });
+        saveData(data);
+        clearForm();
+        renderTable();
+        updateStats();
+        populatePersonFilter();
+    }
+
+    function clearForm() {
+        ['f-person','f-company','f-role','f-notes'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('f-date').value = '';
+        document.getElementById('f-type').value = 'Internship';
+        document.getElementById('f-status').value = 'Applied';
+    }
+
+    // ── Delete ──
+    function deleteApp(id) {
+        if (!confirm('Delete this application?')) return;
+        const data = loadData().filter(a => a.id !== id);
+        saveData(data);
+        renderTable();
+        updateStats();
+        populatePersonFilter();
+    }
+
+    // ── Edit (inline) ──
+    let editingId = null;
+
+    function startEdit(id) {
+        editingId = id;
+        renderTable();
+    }
+
+    function saveEdit(id) {
+        const data = loadData();
+        const idx = data.findIndex(a => a.id === id);
+        if (idx === -1) return;
+        data[idx].person  = document.getElementById('e-person').value.trim()  || data[idx].person;
+        data[idx].company = document.getElementById('e-company').value.trim() || data[idx].company;
+        data[idx].role    = document.getElementById('e-role').value.trim()    || data[idx].role;
+        data[idx].type    = document.getElementById('e-type').value;
+        data[idx].status  = document.getElementById('e-status').value;
+        data[idx].date    = document.getElementById('e-date').value;
+        data[idx].notes   = document.getElementById('e-notes').value.trim();
+        saveData(data);
+        editingId = null;
+        renderTable();
+        updateStats();
+        populatePersonFilter();
+    }
+
+    function cancelEdit() {
+        editingId = null;
+        renderTable();
+    }
+
+    // ── Render ──
+    const STATUS_BADGE = {
+        Applied:   'badge-applied',
+        Interview: 'badge-interview',
+        Offer:     'badge-offer',
+        Rejected:  'badge-rejected',
+        Withdrawn: 'badge-withdrawn',
+        Pending:   'badge-pending',
+    };
+
+    const STATUS_LABEL = {
+        Applied: 'Applied', Interview: 'Interviewing', Offer: 'Offer',
+        Rejected: 'Rejected', Withdrawn: 'Withdrawn', Pending: 'Pending',
+    };
+
+    function renderTable() {
+        let data = loadData();
+
+        const fp = document.getElementById('filter-person').value;
+        const ft = document.getElementById('filter-type').value;
+        const fs = document.getElementById('filter-status').value;
+        const fq = document.getElementById('filter-search').value.toLowerCase();
+
+        if (fp) data = data.filter(a => a.person === fp);
+        if (ft) data = data.filter(a => a.type === ft);
+        if (fs) data = data.filter(a => a.status === fs);
+        if (fq) data = data.filter(a =>
+            a.company.toLowerCase().includes(fq) || a.role.toLowerCase().includes(fq)
+        );
+
+        document.getElementById('results-count').textContent =
+            data.length === 0 ? '' : `Showing ${data.length} application${data.length !== 1 ? 's' : ''}`;
+
+        const tbody = document.getElementById('table-body');
+
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No applications match your filters.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = data.map(a => {
+            if (a.id === editingId) {
+                return `<tr class="editing">
+                    <td><input class="inline-edit" id="e-person"  value="${esc(a.person)}"></td>
+                    <td><input class="inline-edit" id="e-company" value="${esc(a.company)}"></td>
+                    <td><input class="inline-edit" id="e-role"    value="${esc(a.role)}"></td>
+                    <td><select class="inline-edit" id="e-type">
+                        <option ${a.type==='Internship'?'selected':''}>Internship</option>
+                        <option ${a.type==='Placement Year'?'selected':''}>Placement Year</option>
+                    </select></td>
+                    <td><select class="inline-edit" id="e-status">
+                        <option value="Applied"   ${a.status==='Applied'?'selected':''}>Applied</option>
+                        <option value="Interview" ${a.status==='Interview'?'selected':''}>Interviewing</option>
+                        <option value="Offer"     ${a.status==='Offer'?'selected':''}>Offer</option>
+                        <option value="Rejected"  ${a.status==='Rejected'?'selected':''}>Rejected</option>
+                        <option value="Withdrawn" ${a.status==='Withdrawn'?'selected':''}>Withdrawn</option>
+                        <option value="Pending"   ${a.status==='Pending'?'selected':''}>Pending</option>
+                    </select></td>
+                    <td><input class="inline-edit" id="e-date" type="date" value="${esc(a.date)}"></td>
+                    <td><input class="inline-edit" id="e-notes" value="${esc(a.notes)}"></td>
+                    <td class="actions-cell">
+                        <button class="btn-icon" title="Save"   onclick="saveEdit(${a.id})">&#10003;</button>
+                        <button class="btn-icon" title="Cancel" onclick="cancelEdit()">&#10005;</button>
+                    </td>
+                </tr>`;
+            }
+
+            const badgeClass = STATUS_BADGE[a.status] || 'badge-pending';
+            const typeClass  = a.type === 'Internship' ? 'type-internship' : 'type-placement';
+            const dateStr    = a.date ? new Date(a.date + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : '—';
+
+            return `<tr>
+                <td>${esc(a.person)}</td>
+                <td><strong>${esc(a.company)}</strong></td>
+                <td>${esc(a.role)}</td>
+                <td><span class="badge ${typeClass}">${esc(a.type)}</span></td>
+                <td><span class="badge ${badgeClass}">${STATUS_LABEL[a.status] || a.status}</span></td>
+                <td>${dateStr}</td>
+                <td style="max-width:220px;word-break:break-word;">${esc(a.notes) || '—'}</td>
+                <td class="actions-cell">
+                    <button class="btn-icon" title="Edit"   onclick="startEdit(${a.id})">&#9998;</button>
+                    <button class="btn-icon" title="Delete" onclick="deleteApp(${a.id})">&#128465;</button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    function esc(str) {
+        return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Stats ──
+    function updateStats() {
+        const data = loadData();
+        document.getElementById('stat-total').textContent    = data.length;
+        document.getElementById('stat-applied').textContent  = data.filter(a => a.status === 'Applied').length;
+        document.getElementById('stat-interview').textContent= data.filter(a => a.status === 'Interview').length;
+        document.getElementById('stat-offer').textContent    = data.filter(a => a.status === 'Offer').length;
+        document.getElementById('stat-rejected').textContent = data.filter(a => a.status === 'Rejected').length;
+    }
+
+    // ── Person Filter ──
+    function populatePersonFilter() {
+        const data = loadData();
+        const people = [...new Set(data.map(a => a.person))].sort();
+        const sel = document.getElementById('filter-person');
+        const current = sel.value;
+        sel.innerHTML = '<option value="">Everyone</option>' +
+            people.map(p => `<option value="${esc(p)}" ${p===current?'selected':''}>${esc(p)}</option>`).join('');
+    }
+
+    // ── Collapsible form ──
+    let formOpen = true;
+    function toggleForm() {
+        formOpen = !formOpen;
+        document.getElementById('add-form-body').style.display = formOpen ? '' : 'none';
+        document.getElementById('form-toggle-icon').style.transform = formOpen ? '' : 'rotate(-90deg)';
+    }
+
+    // ── Filters ──
+    function clearFilters() {
+        document.getElementById('filter-person').value = '';
+        document.getElementById('filter-type').value   = '';
+        document.getElementById('filter-status').value = '';
+        document.getElementById('filter-search').value = '';
+        renderTable();
+    }
+</script>
+</body>
+</html>

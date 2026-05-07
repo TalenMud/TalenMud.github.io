@@ -1,15 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Talen's website</title>
-    <link href="styles.css" rel="stylesheet" type="text/css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talen</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
 </head>
 <body>
-</div>
-    <h1>I'm Talen</h1>
-    <img class="imageIcon" src="https://cloud-8pm6xxt4x-hack-club-bot.vercel.app/0786ab8be95f81a02c19d4620ac06fc89.jpg"/>
-    <p class="desc">This is my website</p>
-    <p class="desc">My own part of the internet...</p>
-    <script src="navbar.js"></script>
+  <canvas id="webgl"></canvas>
+  <div id="overlay"></div>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

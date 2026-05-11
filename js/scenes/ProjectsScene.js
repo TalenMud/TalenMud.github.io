@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { createStarfield } from '../components/Stars.js';
 
 const PROJECTS = [
@@ -125,64 +126,39 @@ export class ProjectsScene {
 
     this.starfield = createStarfield(2000);
     this.scene.add(this.starfield);
-    this._buildRecordPlayer();
+    this._loadRecordPlayer();
     this._buildRecords();
     this._buildUI();
     this._bindEvents();
   }
 
-  _buildRecordPlayer() {
-    const mat = new THREE.MeshStandardMaterial({ color: 0x1a1a2e, roughness: 0.6, metalness: 0.3 });
-    const accentMat = new THREE.MeshStandardMaterial({ color: 0x333355, roughness: 0.4, metalness: 0.5 });
+  _loadRecordPlayer() {
+    const loader = new GLTFLoader();
+    loader.load('assets/turntable.glb', (gltf) => {
+      this.playerGroup = gltf.scene;
+      this.playerGroup.position.set(2.8, -0.5, -4);
+      this.playerGroup.rotation.y = -0.5;
 
-    this.playerGroup = new THREE.Group();
+      // Find the platter mesh by name for rotation animation
+      gltf.scene.traverse((node) => {
+        if (node.name && node.name.toLowerCase().includes('platter')) {
+          this.platter = node;
+        }
+      });
 
-    // Body box
-    const body = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.25, 1.2), mat);
-    this.playerGroup.add(body);
+      // Fallback: if no platter found by name, create a dummy one
+      if (!this.platter) {
+        this.platter = new THREE.Mesh();
+        this.platter.rotation = new THREE.Euler();
+      }
 
-    // Platter (cylinder)
-    const platterMat = new THREE.MeshStandardMaterial({ color: 0x222233, roughness: 0.3, metalness: 0.7 });
-    this.platter = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.04, 32), platterMat);
-    this.platter.position.set(-0.2, 0.14, 0);
-    this.playerGroup.add(this.platter);
-
-    // Platter mat
-    const matDisc = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.42, 0.42, 0.01, 32),
-      new THREE.MeshStandardMaterial({ color: 0x1a0a00, roughness: 0.9 })
-    );
-    matDisc.position.set(-0.2, 0.17, 0);
-    this.playerGroup.add(matDisc);
-
-    // Tonearm pivot
-    const pivot = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 8), accentMat);
-    pivot.position.set(0.52, 0.2, -0.3);
-    this.playerGroup.add(pivot);
-
-    // Tonearm
-    const armGeo = new THREE.BoxGeometry(0.7, 0.025, 0.025);
-    this.tonearm = new THREE.Mesh(armGeo, accentMat);
-    this.tonearm.position.set(0.2, 0.2, -0.3);
-    this.tonearm.rotation.y = 0.3;
-    this.playerGroup.add(this.tonearm);
-
-    // Needle
-    const needle = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.008, 0.002, 0.12, 6),
-      new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 1 })
-    );
-    needle.position.set(-0.12, 0.1, -0.28);
-    needle.rotation.z = 0.4;
-    this.playerGroup.add(needle);
-
-    this.playerGroup.position.set(2.8, -0.5, -4);
-    this.playerGroup.rotation.y = -0.5;
-    this.scene.add(this.playerGroup);
-
-    // The slot where vinyl lands on player — invisible target
-    this.playerSlot = new THREE.Vector3(2.8 - 0.2 * Math.cos(-0.5), -0.5 + 0.22, -4 + 0.2 * Math.sin(-0.5));
+      this.scene.add(this.playerGroup);
+    });
   }
+
+  _buildRecordPlayer() {
+    // Kept for compatibility, but now loading from GLB instead
+    console.log('Record player loaded from GLB');
 
   _buildRecords() {
     PROJECTS.forEach((proj, i) => {

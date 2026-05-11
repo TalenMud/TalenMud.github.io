@@ -2,10 +2,9 @@ import * as THREE from 'three';
 import { createStarfield } from '../components/Stars.js';
 
 const SOCIALS = [
-  { icon: '⌥', label: 'GitHub',    href: '#' },
-  { icon: '◈', label: 'Instagram', href: '#' },
-  { icon: '◇', label: 'LinkedIn',  href: '#' },
-  { icon: '✦', label: 'Email',     href: '#' },
+  { icon: '⌥', label: 'GitHub',   href: 'https://github.com/talenmud' },
+  { icon: '◇', label: 'LinkedIn', href: 'https://www.linkedin.com/in/talen-mudaly/' },
+  { icon: '✦', label: 'Email',    href: 'mailto:talenmudaly@gmail.com' },
 ];
 
 export class FindMeScene {

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { createStarfield, createSpaceStars } from '../components/Stars.js';
 
 // ── Portal wormhole shader ─────────────────────────────────────────────────
@@ -73,7 +74,7 @@ void main() {
   gl_FragColor = vec4(col, 1.0);
 }`;
 
-const PLANET2_FRAG = `  // warm orange/rust ringed planet
+const PLANET2_FRAG = `  // warm orange/rust ringed planet — rougher surface
 uniform float uTime;
 varying vec2 vUv; varying vec3 vNormal; varying vec3 vViewDir;
 float h(float n) { return fract(sin(n)*43758.5453); }
@@ -83,12 +84,15 @@ float noise2(vec2 p) {
              mix(h(i.x+(i.y+1.0)*57.0),h(i.x+1.0+(i.y+1.0)*57.0),f.x),f.y);
 }
 void main() {
-  float n = noise2(vec2(vUv.x*4.0 + uTime*0.006, vUv.y*6.0));
-  float bands = sin(vUv.y*9.0 + n*1.8) * 0.5 + 0.5;
-  vec3 col = mix(vec3(0.45,0.18,0.04), vec3(0.72,0.38,0.12), bands);
-  col = mix(col, vec3(0.85,0.62,0.3), noise2(vUv*6.0)*0.3);
+  float n  = noise2(vec2(vUv.x*4.0 + uTime*0.006, vUv.y*6.0));
+  float n2 = noise2(vec2(vUv.x*14.0 - uTime*0.003, vUv.y*18.0));
+  float n3 = noise2(vUv*30.0) * 0.18;
+  float bands = sin(vUv.y*9.0 + n*3.2 + n2*1.8) * 0.5 + 0.5;
+  vec3 col = mix(vec3(0.42,0.16,0.03), vec3(0.70,0.36,0.10), bands);
+  col = mix(col, vec3(0.82,0.58,0.28), noise2(vUv*6.0)*0.28);
+  col = mix(col, vec3(0.28,0.10,0.02), n2*0.35 + n3);
   float rim = 1.0 - max(0.0, dot(vNormal, vViewDir));
-  col += vec3(0.6,0.3,0.1) * pow(rim, 3.0) * 0.7;
+  col += vec3(0.55,0.28,0.08) * pow(rim, 3.2) * 0.65;
   gl_FragColor = vec4(col, 1.0);
 }`;
 
@@ -331,12 +335,39 @@ export class LandingScene {
       this.scene.add(rock);
     });
 
-    // Door portal
-    const { group, portalMesh, halo } = buildDoorPortal(this.portalUniforms);
-    group.position.set(0, -0.1, 0);
-    this.scene.add(group);
-    this.portalMesh = portalMesh;
-    this.halo = halo;
+    // Halo plane behind portal (keeps the glow effect)
+    const haloMat = new THREE.MeshBasicMaterial({
+      color: 0x5500bb, transparent: true, opacity: 0.18,
+      side: THREE.DoubleSide, depthWrite: false,
+    });
+    this.halo = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 3.6), haloMat);
+    this.halo.position.set(0, -0.1, -0.4);
+    this.scene.add(this.halo);
+
+    // Shader surface for the portal interior (used for animation + click)
+    const portalSurface = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.5, 2.5),
+      new THREE.ShaderMaterial({
+        uniforms: this.portalUniforms,
+        vertexShader: PORTAL_VERT,
+        fragmentShader: PORTAL_FRAG,
+        transparent: true,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      })
+    );
+    portalSurface.position.set(0, -0.1, 0.05);
+    this.scene.add(portalSurface);
+    this.portalMesh = portalSurface;
+
+    // GLB portal model
+    const portalLoader = new GLTFLoader();
+    portalLoader.load('assets/Cyberpunk_Doorway.glb', (gltf) => {
+      this.portalModel = gltf.scene;
+      this.portalModel.position.set(0, -0.1, 0);
+      this.portalModel.scale.set(1.0, 1.0, 1.0);
+      this.scene.add(this.portalModel);
+    });
 
     // Planet 1 — blue/purple gas giant, upper left
     this.planet1 = buildPlanet(PLANET1_FRAG, 2.8, this.planet1Uniforms);
@@ -349,27 +380,40 @@ export class LandingScene {
     this.planet2.position.set(16, -3, -24);
     this.scene.add(this.planet2);
 
-    // Rings for planet 2
+    // Rings for planet 2 (orange)
     const ringMat = new THREE.MeshBasicMaterial({
-      color: 0xc87832,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.55,
-      depthWrite: false,
+      color: 0xc87832, side: THREE.DoubleSide,
+      transparent: true, opacity: 0.55, depthWrite: false,
     });
     [4.2, 5.0, 5.7].forEach((r, i) => {
       const ring = new THREE.Mesh(new THREE.TorusGeometry(r * 0.34, 0.06 + i * 0.03, 4, 80), ringMat);
       ring.position.copy(this.planet2.position);
-      ring.rotation.x = 1.2;
-      ring.rotation.z = 0.2;
+      ring.rotation.x = 1.2; ring.rotation.z = 0.2;
       this.scene.add(ring);
     });
 
-    // Astronaut — floating in distance
-    this.astronaut = buildAstronaut();
-    this.astronaut.position.set(-6.5, 1.5, -10);
-    this.astronaut.rotation.y = 0.8;
-    this.scene.add(this.astronaut);
+    // Rings for planet 1 (blue — Saturn-style)
+    const ringMat1 = new THREE.MeshBasicMaterial({
+      color: 0x3366cc, side: THREE.DoubleSide,
+      transparent: true, opacity: 0.38, depthWrite: false,
+    });
+    [3.8, 4.6, 5.3].forEach((r, i) => {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(r * 0.42, 0.05 + i * 0.025, 4, 80), ringMat1);
+      ring.position.copy(this.planet1.position);
+      ring.rotation.x = 1.1; ring.rotation.z = 0.4;
+      this.scene.add(ring);
+    });
+
+    // Astronaut — GLB model floating in distance
+    const astLoader = new GLTFLoader();
+    astLoader.load('assets/astronaut.glb', (gltf) => {
+      this.astronaut = gltf.scene;
+      this.astronaut.position.set(-6.5, 1.5, -10);
+      this.astronaut.rotation.y = 0.8;
+      this.astronaut.scale.set(1.2, 1.2, 1.2);
+      this.scene.add(this.astronaut);
+    });
+
 
     this._buildUI();
     this._setupRaycaster();
@@ -382,6 +426,7 @@ export class LandingScene {
       <h1>
         <span class="yo">Yo</span><span class="neutral">, I'm </span><span class="talen">Talen</span>
       </h1>
+      <p class="landing-subtitle">developer · designer · look around</p>
       <button id="enter-btn">✦ Enter ✦</button>
     `;
     this.ui.style.display = 'none';
@@ -438,9 +483,13 @@ export class LandingScene {
 
     // Astronaut float
     this._astronautT += delta;
-    this.astronaut.position.y = 1.5 + Math.sin(this._astronautT * 0.5) * 0.18;
-    this.astronaut.rotation.z = Math.sin(this._astronautT * 0.3) * 0.06;
-    this.astronaut.rotation.y = 0.8 + Math.sin(this._astronautT * 0.2) * 0.08;
+    if (this.astronaut) {
+      this.astronaut.position.y = 1.5 + Math.sin(this._astronautT * 0.5) * 0.18;
+      this.astronaut.rotation.z = Math.sin(this._astronautT * 0.3) * 0.06;
+      this.astronaut.rotation.y = 0.8 + Math.sin(this._astronautT * 0.2) * 0.08;
+    }
+
+    // Spaceship drift
   }
 
   onResize() {

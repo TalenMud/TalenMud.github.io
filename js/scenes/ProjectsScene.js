@@ -159,6 +159,7 @@ export class ProjectsScene {
   _buildRecordPlayer() {
     // Kept for compatibility, but now loading from GLB instead
     console.log('Record player loaded from GLB');
+  }
 
   _buildRecords() {
     PROJECTS.forEach((proj, i) => {
